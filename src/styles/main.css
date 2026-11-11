@@ -1,0 +1,79 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Design tokens (RGB triplets so Tailwind alpha utilities work). Pattern adapted from the office
+   AI Vision tokens.css: one place to white-label, severity colours never change between themes. */
+:root {
+  --page: 242 244 246;
+  --surface: 255 255 255;
+  --raised: 255 255 255;
+  --sunken: 237 240 243;
+  --line: 218 223 230;
+  --ink: 28 34 43;
+  --sub: 84 94 108;
+  --mute: 124 134 148;
+  --brand: 52 98 150;
+  --ok: 42 133 92;
+  --warn: 176 118 20;
+  --critical: 190 62 56;
+  --high: 192 98 40;
+  --medium: 150 116 22;
+  --low: 52 98 150;
+}
+.dark {
+  --page: 17 20 25;
+  --surface: 24 28 34;
+  --raised: 30 35 42;
+  --sunken: 20 24 29;
+  --line: 44 51 61;
+  --ink: 224 228 234;
+  --sub: 156 165 178;
+  --mute: 115 124 138;
+  --brand: 122 160 204;
+  --ok: 86 176 130;
+  --warn: 214 160 62;
+  --critical: 224 104 98;
+  --high: 222 140 84;
+  --medium: 204 170 70;
+  --low: 122 160 204;
+}
+
+html, body, #app { height: 100%; }
+body {
+  @apply bg-page text-ink font-sans antialiased;
+  font-size: 14px;
+}
+* { scrollbar-width: thin; scrollbar-color: rgb(var(--line)) transparent; }
+
+@layer components {
+  .card { @apply rounded-lg border border-line bg-surface; }
+  .card-pad { @apply p-4 sm:p-5; }
+  .h-section { @apply text-[11px] font-semibold uppercase tracking-[0.08em] text-mute; }
+  .btn {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-lg border border-line bg-raised px-3 py-1.5 text-[13px] font-medium text-ink transition hover:bg-sunken focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand disabled:opacity-50;
+  }
+  .btn-primary { @apply border-transparent bg-brand text-page hover:bg-brand/90; }
+  .btn-sm { @apply px-2 py-1 text-xs; }
+  .input {
+    @apply w-full rounded-lg border border-line bg-sunken px-2.5 py-1.5 text-[13px] text-ink outline-none focus:border-brand;
+  }
+  .th { @apply whitespace-nowrap px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-mute; }
+  .td { @apply px-3 py-2.5 text-[13px]; }
+  .tr-hover { @apply cursor-pointer border-t border-line transition hover:bg-sunken/70; }
+}
+
+/* CCTV feed treatment: muted colour, light grain, soft vignette */
+.cctv-img { filter: saturate(0.82) contrast(0.96) brightness(0.94); }
+.cctv-grain {
+  position: absolute; inset: 0; pointer-events: none; opacity: 0.07; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/></filter><rect width='120' height='120' filter='url(%23n)'/></svg>");
+}
+.cctv-vignette { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at center, transparent 60%, rgb(0 0 0 / 0.32) 100%); }
+@keyframes cctv-drift { from { transform: scale(1) translate(0, 0); } to { transform: scale(1.012) translate(-0.2%, 0.1%); } }
+.cctv-drift { animation: cctv-drift 38s ease-in-out infinite alternate; transform-origin: 50% 50%; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
