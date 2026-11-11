@@ -30,10 +30,10 @@ The new project lives at the sibling path `../ai_vision_construction_demo`, outs
  │ rules.ts (evaluateCompliance)  zones.ts  alertManager.ts          │
  │ events.ts (EventBus, SafetyViolationDetected)  analytics.ts       │
  └──────────────────────────────────────────────────────────────────┘
-   types/  mock/ (deterministic sample data: site, policy, actors, history)
+   types/  data/ + api/ (reference data loaded from the backend REST API; the sample data itself lives in backend/src/data/)
 ```
 
-Rules of the road (enforced by `tests/pipeline.test.ts`): `types/`, `domain/`, `services/`, `mock/` never import Vue, Pinia, the router or any UI module.
+Rules of the road (enforced by `frontend/tests/pipeline.test.ts`): `types/`, `domain/`, `services/`, `data/`, `api/` never import Vue, Pinia, the router or any UI module.
 
 ### Pipeline (per tick, 4 Hz of session time)
 
@@ -56,7 +56,7 @@ CameraSource.getFrame → PersonDetector → CentroidTracker (track IDs)
 `ZoneRule { required[ppe], severity[ppe], restricted, restrictedSeverity }` per zone, stored in `stores/policy.ts` (localStorage). Site / camera / activity scopes are shown as roadmap in the UI; the model can add them as additional rule layers resolved before `evaluateCompliance`.
 
 ### Event model & alerts
-`SafetyViolationDetected` / `SafetyViolationResolved` go through `EventBus`. The app subscribes one sink (dashboard + toasts). Email, Slack, webhook, SMS, browser notifications = more `EventSink`s (`services/notifications/channels.ts`).
+`SafetyViolationDetected` / `SafetyViolationResolved` go through `EventBus`. The app subscribes one sink (dashboard + toasts). Email, Slack, webhook, SMS, browser notifications = more `EventSink`s.
 
 ### Determinism
 No `Math.random`. Detections are hand-placed boxes (percent of frame) over each camera's photo with a deterministic hash-based jitter; PPE confidence jitter is a hash of (actor, item, second); history uses a seeded PRNG. The monitoring clock starts at today 14:32:00 local. "Refresh monitoring" resets to t=0.

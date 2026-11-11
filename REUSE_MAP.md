@@ -26,4 +26,3 @@ Legend: **Reused** = concept/convention carried over · **Adapted** = re-impleme
 | `stores/auth.ts`, JWT, roles/users/admin pages, payload encryption | - | **Not used** | Public demo, no login, no secrets |
 | FastAPI `app/api/*`, SQLAlchemy models, Alembic, PostgreSQL | `src/domain`, `src/services` (framework-free TS) | **Rewritten** | These layers play the backend role without a server. They are pure TS and port to a Node service or can be re-expressed in Python |
 | `docker-compose.yml`, Dockerfiles, nginx.conf, GitLab CI | `vercel.json` | **Not used** | No Docker for the demo |
-| `.env`, `.env.bak*`, `.env.example` | `.env.example` (placeholders only) | **Not used / new** | No production values copied |

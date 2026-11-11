@@ -1,0 +1,36 @@
+{
+  "name": "siteguard-backend",
+  "private": true,
+  "version": "0.1.0",
+  "description": "SiteGuard AI REST API (Ts.ED + Express). Serves the site, policy, actor and history mock data.",
+  "scripts": {
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "build": "tsc -p tsconfig.build.json",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@tsed/core": "^8.0.0",
+    "@tsed/di": "^8.0.0",
+    "@tsed/exceptions": "^8.0.0",
+    "@tsed/platform-express": "^8.0.0",
+    "@tsed/platform-http": "^8.46.3",
+    "@tsed/platform-params": "^8.46.3",
+    "@tsed/schema": "^8.0.0",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "reflect-metadata": "^0.2.2"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/node": "^24.0.0",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "~5.9.3",
+    "vitest": "^3.2.4"
+  },
+  "engines": {
+    "node": ">=22.12"
+  }
+}
