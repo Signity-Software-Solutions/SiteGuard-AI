@@ -101,3 +101,44 @@ The detection pipeline is built on three interfaces, so the tracker, rule engine
 - `PPEInferenceProvider.detectPPE(frame, person)` - returns `{ helmet, safetyVest, safetyShoes, goggles, harness }`, each as `{ detected, confidence }`
 
 To plug in your own model (e.g. a YOLO / custom PPE service), implement these (see the `RealPPEInferenceProvider` and `RTSPCameraSource` extension points) and change the three constructor arguments in `frontend/src/stores/site.ts`. See `ARCHITECTURE.md` §3.
+
+## AI technologies for detecting and tracking people on camera
+SiteGuard AI's inference layer is pluggable behind the `CameraSource` / `PersonDetector` / `PPEInferenceProvider` interfaces. The technologies below are the recommended options for the vision pipeline; none of them are bundled as dependencies of this repository.
+
+### Pipeline overview
+```
+Camera (RTSP/CCTV) -> frame decode -> person detection -> multi-object tracking -> PPE detection -> rule engine -> alerts
+```
+
+### Python packages (inference service)
+| Stage | Package | Purpose |
+|---|---|---|
+| Frame capture | `opencv-python` (OpenCV) | Read RTSP/video streams, resize and draw boxes |
+| Frame capture | `ffmpeg` / `PyAV` | Robust RTSP decoding, reconnects, hardware decoding |
+| Person + PPE detection | `ultralytics` (YOLOv8 / YOLO11) | Real-time object detection; person detector, or a custom model trained on helmet / vest / shoes / goggles / harness classes |
+| Person detection | `torch`, `torchvision` | Deep-learning runtime; Faster R-CNN / RetinaNet / SSD alternatives |
+| Person detection | `mmdetection`, `detectron2` | Research-grade detection frameworks (RT-DETR, Mask R-CNN) |
+| Tracking (stable worker IDs) | `supervision` (ByteTrack) | Tracking, zone and line-crossing utilities, annotators |
+| Tracking | `boxmot`, `deep-sort-realtime`, `norfair` | ByteTrack / BoT-SORT / DeepSORT trackers |
+| Pose / body keypoints | `mediapipe`, YOLO-Pose, `mmpose` | Detect posture, falls, harness attachment or working at height |
+| Segmentation | `segment-anything` (SAM) | Pixel-accurate zones or PPE regions |
+| Model serving | `fastapi` + `uvicorn` | Expose `POST /detect` for `RealPPEInferenceProvider` |
+| Model optimisation | `onnxruntime`, `openvino`, `TensorRT` | Faster CPU / GPU inference on edge devices |
+| Training data | `roboflow`, `labelImg`, `CVAT` | Annotate and manage PPE datasets |
+
+### Browser / JavaScript options
+| Package | Purpose |
+|---|---|
+| `onnxruntime-web` | Run ONNX models (e.g. exported YOLO) in the browser via WebAssembly / WebGPU |
+| `@tensorflow/tfjs` + `@tensorflow-models/coco-ssd` / `pose-detection` | In-browser person and pose detection |
+| `@mediapipe/tasks-vision` | Object, pose and hand detection in the browser |
+
+### Models and datasets
+- **Pretrained:** COCO-trained YOLO / RT-DETR models detect the `person` class out of the box.
+- **PPE:** fine-tune on public PPE datasets (for example the Construction Site Safety and Hard Hat Workers datasets on Roboflow Universe / Kaggle) so the model recognises helmet, vest, goggles, shoes and harness.
+- **Evaluation:** track precision / recall per PPE class and test on your own site footage before relying on alerts.
+
+### Infrastructure
+- **Streaming:** RTSP / ONVIF cameras, `MediaMTX` or `go2rtc` to restream to WebRTC / HLS for the browser.
+- **Hardware:** NVIDIA GPU (CUDA) or Jetson edge devices for real-time multi-camera inference; Intel iGPU via OpenVINO.
+- **Messaging:** MQTT / WebSocket for pushing detections and alerts to the dashboard.
